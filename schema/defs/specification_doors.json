@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "specification_doors-def.json",
+  "title": "ReqIF Specification Mapping Schema",
+  "description": "JSON Schema with the default Specification fields",
+  "definitions": {
+    "specification": {
+      "type": "object",
+      "description": "Requirements specification/document container",
+      "required": [
+        "IE PUID"
+      ],
+      "properties": {
+        "IE PUID": {
+          "allOf": [
+            {
+              "properties": {
+                "longName": {
+                  "const": "IE PUID"
+                }
+              }
+            },
+            {
+              "$ref": "./types/types.json#/definitions/StringAttribute",
+              "description": "Unique identifier from IBM DOORS as default Requirement ID"
+            }
+          ]
+        }
+      },
+      "additionalProperties": {
+        "$ref": "./types/types.json#/definitions/AnyAttributeValue"
+      }
+    }
+  }
+}

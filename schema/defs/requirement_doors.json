@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "requirement_doors-def.json",
+  "title": "ReqIF DOORS Requirement Mapping Schema",
+  "description": "JSON Schema with the Requirement fields",
+  "definitions": {
+    "requirement": {
+      "type": "object",
+      "required": [
+        "IE PUID",
+        "IE Object Type"
+      ],
+      "properties": {
+        "IE PUID": {
+          "allOf": [
+            {
+              "description": "Unique identifier from IBM DOORS as default Requirement ID",
+              "properties": {
+                "longName": {
+                  "const": "IE PUID"
+                }
+              }
+            },
+            {
+              "$ref": "./types/types.json#/definitions/StringAttribute"
+            }
+          ]
+        },
+        "IE Object Type": {
+          "allOf": [
+            {
+              "description": "Unique identifier from IBM DOORS as default Requirement ID",
+              "properties": {
+                "longName": {
+                  "const": "IE Object Type"
+                }
+              }
+            },
+            {
+              "$ref": "./types/types.json#/definitions/EnumerationAttribute"
+            }
+          ]
+        }
+      }
+    },
+    "additionalProperties": {
+      "$ref": "./types/types.json#/definitions/AnyAttributeValue"
+    }
+  }
+}

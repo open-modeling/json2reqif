@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "relation-def.json",
+  "title": "ReqIF Relation Mapping Schema",
+  "description": "JSON Schema with the default Relation fields",
+  "definitions": {
+    "relation": {
+      "type": "object",
+      "description": "Relationship/link between requirements",
+      "properties": {
+        "lastChange": {
+          "$ref": "./attributes/reqif.json#/definitions/lastChange"
+        },
+        "ReqIF.Description": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.Description"
+        },
+        "ReqIF.ForeignCreatedBy": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignCreatedBy"
+        },
+        "ReqIF.ForeignCreatedOn": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignCreatedOn"
+        },
+        "ReqIF.ForeignID": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignID"
+        },
+        "ReqIF.ForeignModifiedBy": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignModifiedBy"
+        },
+        "ReqIF.Name": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.Name"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "types/types.json#/definitions/AnyAttributeValue"
+      }
+    }
+  }
+}

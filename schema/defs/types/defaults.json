@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "defaults.json",
+  "title": "ReqIF Attribute Type Definitions",
+  "description": "Reusable attribute type definitions based on prostep ivip ReqIF Implementation Guide v1.8",
+  "definitions": {
+    "selector": {
+      "type": "string",
+      "description": "JSONPath pointer to the element from the parent node"
+    },
+    "config": {
+      "required": [
+        "tool",
+        "toolVersion",
+        "repository"
+      ],
+      "properties": {
+        "tool": {
+          "description": "Tool name to reflect in the specification",
+          "type": "string"
+        },
+        "toolVersion": {
+          "description": "Tool version to reflect in the specification",
+          "type": "string"
+        },
+        "repository": {
+          "description": "Repository identifier to match requirement groups against each other",
+          "type": "string"
+        }
+      }
+    },
+    "_defaultAttrs": {
+      "type": "object",
+      "required": [
+        "longName",
+        "selector",
+        "attributeType"
+      ],
+      "properties": {
+        "selector": {
+          "type": "string",
+          "readOnly": true,
+          "description": "JSONPath pointer to the element from the parent node"
+        },
+        "longName": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Long name for the attributes to reflect in ReqIf specification"
+        },
+        "attributeType": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Attribute type in the specifications"
+        }
+      }
+    }
+  }
+}

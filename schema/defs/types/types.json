@@ -1,0 +1,194 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "types.json",
+  "title": "ReqIF Attribute Type Definitions",
+  "description": "Reusable attribute type definitions based on prostep ivip ReqIF Implementation Guide v1.8",
+  "definitions": {
+    "BooleanAttribute": {
+      "description": "AttributeDefinitionBoolean / AttributeValueBoolean - for true/false values",
+      "allOf": [
+        {
+          "properties": {
+            "attributeType": {
+              "const": "BOOLEAN"
+            }
+          }
+        },
+        {
+          "$ref": "./defaults.json#/definitions/_defaultAttrs"
+        }
+      ]
+    },
+    "DateAttribute": {
+      "description": "AttributeDefinitionDate / AttributeValueDate - for temporal values",
+      "allOf": [
+        {
+          "properties": {
+            "attributeType": {
+              "const": "DATE"
+            }
+          }
+        },
+        {
+          "$ref": "./defaults.json#/definitions/_defaultAttrs"
+        }
+      ]
+    },
+    "EnumerationAttributeValue": {
+      "description": "AttributeDefinitionEnumerationValue - for predefined choices",
+      "type": "object",
+      "required": [
+        "key",
+        "value",
+        "content"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "integer"
+        },
+        "value": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        }
+      }
+    },
+    "EnumerationAttribute": {
+      "description": "AttributeDefinitionEnumeration / AttributeValueEnumeration - for predefined choices",
+      "allOf": [
+        {
+          "required": [
+            "attributeType",
+            "values"
+          ],
+          "properties": {
+            "attributeType": {
+              "const": "ENUMERATION",
+              "type": "string",
+              "readOnly": true,
+              "default": "ENUMERATION"
+            },
+            "values": {
+              "type": "array",
+              "minItems": 1,
+              "items": [
+                {
+                  "$ref": "#/definitions/EnumerationAttributeValue"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "$ref": "./defaults.json#/definitions/_defaultAttrs"
+        }
+      ]
+    },
+    "IntegerAttribute": {
+      "description": "AttributeDefinitionInteger / AttributeValueInteger - for integer values",
+      "allOf": [
+        {
+          "properties": {
+            "attributeType": {
+              "const": "INTEGER"
+            },
+            "min": {},
+            "max": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "$ref": "./defaults.json#/definitions/_defaultAttrs"
+        }
+      ]
+    },
+    "RealAttribute": {
+      "description": "AttributeDefinitionReal / AttributeValueReal - for numeric values with decimals",
+      "allOf": [
+        {
+          "properties": {
+            "attributeType": {
+              "const": "REAL"
+            },
+            "accuracy": {
+              "description": "Number of decimal places",
+              "minimum": 0
+            },
+            "min": {
+              "type": "integer"
+            },
+            "max": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "$ref": "./defaults.json#/definitions/_defaultAttrs"
+        }
+      ]
+    },
+    "StringAttribute": {
+      "description": "AttributeDefinitionString / AttributeValueString - for text values",
+      "allOf": [
+        {
+          "properties": {
+            "attributeType": {
+              "const": "STRING"
+            },
+            "maxLength": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        {
+          "$ref": "./defaults.json#/definitions/_defaultAttrs"
+        }
+      ]
+    },
+    "XHTMLAttribute": {
+      "description": "AttributeDefinitionXHTML / AttributeValueXHTML - for formatted content",
+      "allOf": [
+        {
+          "properties": {
+            "attributeType": {
+              "const": "XHTML"
+            }
+          }
+        },
+        {
+          "$ref": "./defaults.json#/definitions/_defaultAttrs"
+        }
+      ]
+    },
+    "AnyAttributeValue": {
+      "description": "Union type accepting any ReqIF attribute or primitive value",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/StringAttribute"
+        },
+        {
+          "$ref": "#/definitions/DateAttribute"
+        },
+        {
+          "$ref": "#/definitions/XHTMLAttribute"
+        },
+        {
+          "$ref": "#/definitions/EnumerationAttribute"
+        },
+        {
+          "$ref": "#/definitions/BooleanAttribute"
+        },
+        {
+          "$ref": "#/definitions/RealAttribute"
+        },
+        {
+          "$ref": "#/definitions/IntegerAttribute"
+        }
+      ]
+    }
+  }
+}

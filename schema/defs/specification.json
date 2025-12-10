@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "specification-def.json",
+  "title": "ReqIF DOORS Specification Mapping Schema",
+  "description": "JSON Schema with the default Specification fields",
+  "definitions": {
+    "specification": {
+      "type": "object",
+      "description": "Requirements specification/document container",
+      "required": [
+        "ReqIF.Name",
+        "ReqIF.Description",
+        "ReqIF.ForeignID"
+      ],
+      "properties": {
+        "lastChange": {
+          "$ref": "./attributes/reqif.json#/definitions/lastChange"
+        },
+        "ReqIF.ChangeDescription": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ChangeDescription"
+        },
+        "ReqIF.Description": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.Description"
+        },
+        "ReqIF.ForeignBaseline": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignBaseline"
+        },
+        "ReqIF.ForeignCreatedBy": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignCreatedBy"
+        },
+        "ReqIF.ForeignCreatedOn": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignCreatedOn"
+        },
+        "ReqIF.ForeignID": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignID"
+        },
+        "ReqIF.ForeignRevision": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignRevision"
+        },
+        "ReqIF.ForeignModifiedBy": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignModifiedBy"
+        },
+        "ReqIF.ForeignState": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignState"
+        },
+        "ReqIF.Name": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.Name"
+        },
+        "ReqIF.Prefix": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.Prefix"
+        },
+        "ReqIF.Project": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.Project"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "./types/types.json#/definitions/AnyAttributeValue"
+      }
+    }
+  }
+}

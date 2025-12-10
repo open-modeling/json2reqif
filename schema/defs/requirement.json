@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "requirement-def.json",
+  "title": "ReqIF Requirement Mapping Schema",
+  "description": "JSON Schema with the Requirement fields",
+  "definitions": {
+    "requirement": {
+      "type": "object",
+      "required": [
+        "ReqIF.Name",
+        "ReqIF.Text"
+      ],
+      "properties": {
+        "lastChange": {
+          "$ref": "./attributes/reqif.json#/definitions/lastChange"
+        },
+        "ReqIF.AssociatedFiles": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.AssociatedFiles"
+        },
+        "ReqIF.Category": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.Category"
+        },
+        "ReqIF.ChangeDescription": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ChangeDescription"
+        },
+        "ReqIF.ChapterName": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ChapterName"
+        },
+        "ReqIF.ChapterNumber": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ChapterNumber"
+        },
+        "ReqIF.Description": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.Description"
+        },
+        "ReqIF.FitCriteria": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.FitCriteria"
+        },
+        "ReqIF.ForeignCreatedBy": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignCreatedBy"
+        },
+        "ReqIF.ForeignCreatedOn": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignCreatedOn"
+        },
+        "ReqIF.ForeignCreatedThru": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignCreatedThru"
+        },
+        "ReqIF.ForeignDeleted": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignDeleted"
+        },
+        "ReqIF.ForeignID": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignID"
+        },
+        "ReqIF.ForeignModifiedBy": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignModifiedBy"
+        },
+        "ReqIF.ForeignRevision": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.ForeignRevision"
+        },
+        "ReqIF.Name": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.Name"
+        },
+        "ReqIF.Text": {
+          "$ref": "./attributes/reqif.json#/definitions/ReqIF.Text"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "./types/types.json#/definitions/AnyAttributeValue"
+      }
+    }
+  }
+}

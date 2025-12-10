@@ -1,0 +1,336 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "reqif-attributes.json",
+  "title": "ReqIF Attribute Definitions",
+  "description": "JSON Schema for the ReqIf attributes",
+  "definitions": {
+    "lastChange": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "LAST-CHANGE",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/DateAttribute",
+          "description": "Last modification timestamp"
+        }
+      ]
+    },
+    "ReqIF.AssociatedFiles": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.AssociatedFiles",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/StringAttribute",
+          "description": "URIs of associated files"
+        }
+      ]
+    },
+    "ReqIF.Category": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.Category",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/EnumerationAttribute",
+          "description": "Requirement object category"
+        }
+      ]
+    },
+    "ReqIF.ChangeDescription": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.ChangeDescription",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/StringAttribute",
+          "description": "Description of changes"
+        }
+      ]
+    },
+    "ReqIF.ChapterName": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.ChapterName",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/XHTMLAttribute",
+          "description": "Object heading/chapter name"
+        }
+      ]
+    },
+    "ReqIF.ChapterNumber": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.ChapterNumber",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/StringAttribute",
+          "description": "Object heading/chapter number in hierarchy"
+        }
+      ]
+    },
+    "ReqIF.Description": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.Description",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/XHTMLAttribute",
+          "description": "Additional requirement/specification description"
+        }
+      ]
+    },
+    "ReqIF.FitCriteria": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.FitCriteria",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/StringAttribute",
+          "description": "Fit criteria for the requirement"
+        }
+      ]
+    },
+    "ReqIF.ForeignBaseline": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.ForeignBaseline",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/StringAttribute",
+          "description": "Baseline identifier"
+        }
+      ]
+    },
+    "ReqIF.ForeignCreatedBy": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.ForeignCreatedBy",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/StringAttribute",
+          "description": "Creator username from source system"
+        }
+      ]
+    },
+    "ReqIF.ForeignCreatedOn": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.ForeignCreatedOn",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/DateAttribute",
+          "description": "Creation timestamp"
+        }
+      ]
+    },
+    "ReqIF.ForeignCreatedThru": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.ForeignCreatedThru",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/StringAttribute",
+          "description": "Creation method/tool"
+        }
+      ]
+    },
+    "ReqIF.ForeignDeleted": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.ForeignDeleted",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/BooleanAttribute",
+          "description": "Deletion flag from source system"
+        }
+      ]
+    },
+    "ReqIF.ForeignID": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.ForeignID"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/StringAttribute",
+          "description": "Unique identifier from source system"
+        }
+      ]
+    },
+    "ReqIF.ForeignModifiedBy": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.ForeignModifiedBy"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/StringAttribute",
+          "description": "Last modifier username"
+        }
+      ]
+    },
+    "ReqIF.ForeignRevision": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.ForeignRevision"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/StringAttribute",
+          "description": "Version/revision from source system"
+        }
+      ]
+    },
+    "ReqIF.ForeignState": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.ForeignState"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/StringAttribute",
+          "description": "State/status from source system"
+        }
+      ]
+    },
+    "ReqIF.Name": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.Name"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/XHTMLAttribute",
+          "description": "Short text/name of the object"
+        }
+      ]
+    },
+    "ReqIF.Prefix": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.Prefix"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/StringAttribute",
+          "description": "Prefix for requirement numbering"
+        }
+      ]
+    },
+    "ReqIF.Project": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.Project"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/StringAttribute",
+          "description": "Associated project name"
+        }
+      ]
+    },
+    "ReqIF.Text": {
+      "allOf": [
+        {
+          "properties": {
+            "longName": {
+              "const": "ReqIF.Text"
+            }
+          }
+        },
+        {
+          "$ref": "../types/types.json#/definitions/XHTMLAttribute",
+          "description": "Main requirement text/description"
+        }
+      ]
+    }
+  }
+}
