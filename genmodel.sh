@@ -1,1 +1,1 @@
-datamodel-codegen --input-file-type jsonschema --output-model-type pydantic_v2.BaseModel --use-schema-description  --input schema/   --output models/   --use-field-description   --use-standard-collections 
+datamodel-codegen --input-file-type jsonschema --output-model-type pydantic_v2.BaseModel --use-schema-description  --input json2reqif/schema/   --output json2reqif/models/   --use-field-description   --use-standard-collections 

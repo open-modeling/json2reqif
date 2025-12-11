@@ -1,5 +1,5 @@
 {
-    "$schema": "./schema/mapping_capella.json",
+    "$schema": "../json2reqif/schema/mapping_capella.json",
     "config": {
         "tool": "Custom Tool",
         "toolVersion": "1.x.x",
@@ -50,7 +50,6 @@
         "caption": "$.Caption",
         "id": "$.UID",
         "selector": "$",
-        "requirements": "$.children",
         "type": "Functional Requirements"
     },
     "requirements": {

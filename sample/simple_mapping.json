@@ -1,0 +1,83 @@
+{
+    "$schema": "../json2reqif/schema/mapping_capella.json",
+    "config": {
+        "tool": "Custom Tool",
+        "toolVersion": "1.x.x",
+        "repository": "Random Repository Id"
+    },
+    "specification": {
+        "attributes": {
+            "IE PUID": {
+                "attributeType": "STRING",
+                "type": "UID",
+                "maxLength": 50,
+                "longName": "IE PUID",
+                "selector": "$.UID"
+            },
+            "ReqIF.Name": {
+                "attributeType": "XHTML",
+                "longName": "ReqIF.Name",
+                "selector": "$.Caption"
+            },
+            "ReqIF.Description": {
+                "attributeType": "XHTML",
+                "longName": "ReqIF.Description",
+                "selector": "$.Content"
+            },
+            "ReqIF.ForeignID": {
+                "attributeType": "INTEGER",
+                "type": "NUMERIC_ID",
+                "min": 0,
+                "max": 999999,
+                "longName": "ReqIF.ForeignID",
+                "selector": "$.Id"
+            }
+        },
+        "caption": "$.Caption",
+        "id": "$.UID",
+        "selector": "$",
+        "type": "Functional Requirements"
+    },
+    "requirements": {
+        "selector": "$.children",
+        "variants": [
+            {
+                "match": "$[?children.`len` == 0]",
+                "type": "Requirement",
+                "attributes": {
+                    "IE PUID": {
+                        "attributeType": "STRING",
+                        "type": "UID",
+                        "maxLength": 50,
+                        "longName": "IE PUID",
+                        "selector": "$.UID"
+                    },
+                    "IE Object Type": {
+                        "attributeType": "ENUMERATION",
+                        "type": "Object_Type",
+                        "longName": "IE Object Type",
+                        "selector": "",
+                        "literal": "Requirement",
+                        "values": [
+                            {
+                                "key": 0,
+                                "value": "Requirement",
+                                "content": "Magenta"
+                            }
+                        ]
+                    },
+                    "ReqIF.Name": {
+                        "attributeType": "XHTML",
+                        "longName": "ReqIF.Name",
+                        "selector": "$.Caption"
+                    },
+                    "ReqIF.Text": {
+                        "attributeType": "XHTML",
+                        "longName": "ReqIF.Text",
+                        "selector": "$.Content"
+                    }
+                }
+            }
+        ]
+    }
+}

@@ -18,7 +18,6 @@
       "required": [
         "attributes",
         "selector",
-        "requirements",
         "caption",
         "id",
         "type"
@@ -49,9 +48,6 @@
           ]
         },
         "selector": {
-          "$ref": "./defs/types/defaults.json#/definitions/selector"
-        },
-        "requirements": {
           "$ref": "./defs/types/defaults.json#/definitions/selector"
         },
         "type": {
