@@ -3,6 +3,8 @@ Tool for conversion of arbitrary json into correct ReqIF file.
 
 It was primarily developed to convert requirenents from the tools with broken or missing ReqIF support to Capella.
 
+![Capella Preview](sample/sample.png)
+
 ## Features
 * uses JSONSchema for the schema definition
 * uses jsonpath-ng for the data matching and processing
