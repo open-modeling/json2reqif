@@ -28,4 +28,4 @@ It was primarily developed to convert requirenents from the tools with broken or
 
 ## License
 
-`json2reqif` is distributed under the terms of the [EP-2.0L](https://www.eclipse.org/legal/epl-2.0/) license.
+`json2reqif` is distributed under the terms of the [EPL-2.0](https://www.eclipse.org/legal/epl-2.0/) license.
