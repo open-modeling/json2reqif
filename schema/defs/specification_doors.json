@@ -17,6 +17,12 @@
               "properties": {
                 "longName": {
                   "const": "IE PUID"
+                },
+                "maxLength": {
+                  "const": 50
+                },
+                "type": {
+                  "const": "UID"
                 }
               }
             },

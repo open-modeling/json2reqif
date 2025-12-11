@@ -222,7 +222,7 @@
           }
         },
         {
-          "$ref": "../types/types.json#/definitions/StringAttribute",
+          "$ref": "../types/types.json#/definitions/IntegerAttribute",
           "description": "Unique identifier from source system"
         }
       ]

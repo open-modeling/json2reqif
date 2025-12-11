@@ -3,26 +3,25 @@
 JSON to ReqIF Converter - Using strictdoc/reqif Library
 """
 
-from ast import Constant
-from hmac import new
-from logging import config
 from pathlib import Path
-from pickletools import StackObject
 import re
 import json
-from jsonpath_ng import parse, JSONPath, DatumInContext
+from jsonpath_ng import DatumInContext
+from jsonpath_ng.ext import parse
+
+import jsonpath
 import sys
-import reqif
-import reqif.models
+import pydantic
 import shortuuid
 
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Literal, Optional, cast
+from typing import Any, Dict, List, Union
 from xmlrpc.client import Boolean
 from reqif.unparser import ReqIFUnparser
 from reqif.reqif_bundle import ReqIFBundle
 from reqif.models.reqif_core_content import ReqIFCoreContent
 from reqif.models.reqif_data_type import (
+      ReqIFDataTypeDefinitionInteger,
       ReqIFDataTypeDefinitionString,
       ReqIFDataTypeDefinitionXHTML,
       ReqIFDataTypeDefinitionEnumeration,
@@ -53,12 +52,7 @@ from reqif.helpers.lxml import (
     lxml_escape_for_html
 )
 
-from models import (
-    mapping_capella,
-    mapping
-)
-from models.defs import specification
-from models.defs.types.types import EnumerationAttribute, EnumerationAttributeValue, ReqifAttributeTypeDefinitions
+from models import mapping, mapping_capella
 
 class ReqIFConveterHelper:
     @staticmethod
@@ -71,91 +65,51 @@ class ReqIFConveterHelper:
         """Generate unique identifier"""
         return f"{prefix}_{shortuuid.uuid(name)}"
 
-EOTV = [
-    ReqIFEnumValue(identifier=ReqIFConveterHelper._gen_id("EV", "ENUM_VALUE_REQ"), key="0", long_name="Requirement", other_content="Requirement", last_change=ReqIFConveterHelper._get_timestamp()),
-    ReqIFEnumValue(identifier=ReqIFConveterHelper._gen_id("EV", "ENUM_VALUE_FUN"), key="1", long_name="Function",    other_content="Function",    last_change=ReqIFConveterHelper._get_timestamp()),        
-    ReqIFEnumValue(identifier=ReqIFConveterHelper._gen_id("EV", "ENUM_VALUE_CAP"), key="2", long_name="Capability",  other_content="Capability",  last_change=ReqIFConveterHelper._get_timestamp()),        
-    ReqIFEnumValue(identifier=ReqIFConveterHelper._gen_id("EV", "ENUM_VALUE_MIS"), key="3", long_name="Mission",     other_content="Mission",     last_change=ReqIFConveterHelper._get_timestamp()),        
-]
-
-
-DATA_TYPES : Dict[str, ReqIFDataTypeDefinitionXHTML|ReqIFDataTypeDefinitionString|ReqIFDataTypeDefinitionEnumeration]= {
-    "XHTML":            ReqIFDataTypeDefinitionXHTML      (identifier=ReqIFConveterHelper._gen_id("DTD", "DEF_XHTML"),    description="Default XHTML",    long_name="DEF_XHTML",                       last_change=ReqIFConveterHelper._get_timestamp()),
-    "STRING_VERSION":   ReqIFDataTypeDefinitionString     (identifier=ReqIFConveterHelper._gen_id("DTD", "DEF_VERSION"),  description="Document Version", long_name="DEF_VERSION",  max_length="50",   last_change=ReqIFConveterHelper._get_timestamp()),
-    "STRING_ID":        ReqIFDataTypeDefinitionString     (identifier=ReqIFConveterHelper._gen_id("DTD", "DEF_ID"),       description="Requirement Id",   long_name="DEF_ID",       max_length="15",   last_change=ReqIFConveterHelper._get_timestamp()),
-    "STRING_SECTION":   ReqIFDataTypeDefinitionString     (identifier=ReqIFConveterHelper._gen_id("DTD", "DEF_SECTION"),  description="Section Number",   long_name="DEF_SECTION",  max_length="30",   last_change=ReqIFConveterHelper._get_timestamp()),
-    "STRING_UID":       ReqIFDataTypeDefinitionString     (identifier=ReqIFConveterHelper._gen_id("DTD", "DEF_UID"),      description="Unique Id",        long_name="DEF_UID",      max_length="30",   last_change=ReqIFConveterHelper._get_timestamp()),
-    "STRING_URL":       ReqIFDataTypeDefinitionString     (identifier=ReqIFConveterHelper._gen_id("DTD", "DEF_URL"),      description="Requirements URL", long_name="DEF_URL",      max_length="2048", last_change=ReqIFConveterHelper._get_timestamp()),
-    "ENUM_OBJ_TYPE":    ReqIFDataTypeDefinitionEnumeration(identifier=ReqIFConveterHelper._gen_id("DTD", "DEF_OBJ_TYPE"), description="Object Type",      long_name="DEF_OBJ_TYPE", values    =EOTV,   last_change=ReqIFConveterHelper._get_timestamp())
-}
-
-ATTRIBUTES : Dict[str, SpecAttributeDefinition]= {
-    "ReqIF.Name":            SpecAttributeDefinition(identifier=ReqIFConveterHelper._gen_id("AD"), attribute_type=SpecObjectAttributeType.XHTML,       datatype_definition=DATA_TYPES['XHTML'].identifier,          long_name="ReqIF.Name",                                last_change=ReqIFConveterHelper._get_timestamp()),
-    "ReqIF.Text":            SpecAttributeDefinition(identifier=ReqIFConveterHelper._gen_id("AD"), attribute_type=SpecObjectAttributeType.XHTML,       datatype_definition=DATA_TYPES['XHTML'].identifier,          long_name="ReqIF.Text",                                last_change=ReqIFConveterHelper._get_timestamp()),
-    "ReqIF.ForeignRevision": SpecAttributeDefinition(identifier=ReqIFConveterHelper._gen_id("AD"), attribute_type=SpecObjectAttributeType.STRING,      datatype_definition=DATA_TYPES['STRING_VERSION'].identifier, long_name="ReqIF.ForeignRevision",                     last_change=ReqIFConveterHelper._get_timestamp()),
-    "ReqIF.ForeignId":       SpecAttributeDefinition(identifier=ReqIFConveterHelper._gen_id("AD"), attribute_type=SpecObjectAttributeType.STRING,      datatype_definition=DATA_TYPES['STRING_ID'].identifier,      long_name="ReqIF.ForeignId",                           last_change=ReqIFConveterHelper._get_timestamp()),
-    "ReqIF.ChapterName":     SpecAttributeDefinition(identifier=ReqIFConveterHelper._gen_id("AD"), attribute_type=SpecObjectAttributeType.STRING,      datatype_definition=DATA_TYPES['STRING_SECTION'].identifier, long_name="ReqIF.ChapterName",                         last_change=ReqIFConveterHelper._get_timestamp()),
-    "IE PUID":               SpecAttributeDefinition(identifier=ReqIFConveterHelper._gen_id("AD"), attribute_type=SpecObjectAttributeType.STRING,      datatype_definition=DATA_TYPES['STRING_UID'].identifier,     long_name="IE PUID",                                   last_change=ReqIFConveterHelper._get_timestamp()),
-    "URL":                   SpecAttributeDefinition(identifier=ReqIFConveterHelper._gen_id("AD"), attribute_type=SpecObjectAttributeType.STRING,      datatype_definition=DATA_TYPES['STRING_URL'].identifier,     long_name="URL",                                       last_change=ReqIFConveterHelper._get_timestamp()),
-    "IE Object Type":        SpecAttributeDefinition(identifier=ReqIFConveterHelper._gen_id("AD"), attribute_type=SpecObjectAttributeType.ENUMERATION, datatype_definition=DATA_TYPES['ENUM_OBJ_TYPE'].identifier,  long_name="IE Object Type",        multi_valued=False, last_change=ReqIFConveterHelper._get_timestamp()),
-}
-
-SPEC_ATTRIBUTES : Dict[str, SpecAttributeDefinition]= {
-    "Id":              SpecAttributeDefinition(identifier=ReqIFConveterHelper._gen_id("SAD"), attribute_type=SpecObjectAttributeType.STRING, datatype_definition=DATA_TYPES['STRING_ID'].identifier,      long_name="ReqIF.ForeignId",       last_change=ReqIFConveterHelper._get_timestamp()),
-    "UID":             SpecAttributeDefinition(identifier=ReqIFConveterHelper._gen_id("SAD"), attribute_type=SpecObjectAttributeType.STRING, datatype_definition=DATA_TYPES['STRING_UID'].identifier,     long_name="IE PUID",               last_change=ReqIFConveterHelper._get_timestamp()),
-    "URL":             SpecAttributeDefinition(identifier=ReqIFConveterHelper._gen_id("SAD"), attribute_type=SpecObjectAttributeType.STRING, datatype_definition=DATA_TYPES['STRING_URL'].identifier,     long_name="URL",                   last_change=ReqIFConveterHelper._get_timestamp()),
-    "SpecName":        SpecAttributeDefinition(identifier=ReqIFConveterHelper._gen_id('SAD'), attribute_type=SpecObjectAttributeType.XHTML,  datatype_definition=DATA_TYPES["XHTML"].identifier,          long_name="ReqIF.Name",            last_change=ReqIFConveterHelper._get_timestamp()),
-}
-
-SPEC_OBJECT_TYPES : Dict[str, ReqIFSpecObjectType]= {
-    "Functional": ReqIFSpecObjectType.create(
-        description="Requirement",
-        identifier=ReqIFConveterHelper._gen_id("SOT"),
-        last_change=ReqIFConveterHelper._get_timestamp(),
-        attribute_definitions=list(ATTRIBUTES.values())
-    )
-}
-
-SPEC_TYPES = {
-    "Stakeholder Requirements":  ReqIFSpecificationType(
-            identifier      = ReqIFConveterHelper._gen_id('SPEC-TYPE'),
-            long_name       = "Stakeholder Requirements",
-            last_change     = ReqIFConveterHelper._get_timestamp(),
-            spec_attributes = list(SPEC_ATTRIBUTES.values())
-        )
-}
-
 class SpecDataTypesHelper:
     def __init__(self):
-        self.data_types: Dict[str, ReqIFDataTypeDefinitionString|ReqIFDataTypeDefinitionXHTML|ReqIFDataTypeDefinitionEnumeration] = {}
+        self.data_types: Dict[str, ReqIFDataTypeDefinitionInteger|ReqIFDataTypeDefinitionString|ReqIFDataTypeDefinitionXHTML|ReqIFDataTypeDefinitionEnumeration] = {}
+        self.data_typed_by_id: Dict[str, ReqIFDataTypeDefinitionInteger|ReqIFDataTypeDefinitionString|ReqIFDataTypeDefinitionXHTML|ReqIFDataTypeDefinitionEnumeration] = {}
         self.GENERATORS = {
+            "INTEGER": self.createIntegerType,
             "STRING": self.createStringType,
             "XHTML": self.createXhtmlType,
-            "ENUM": self.createEnumType
+            "ENUMERATION": self.createEnumType
         }
 
     def createType(self, type: str, subType: str, rest):
         t = f"{type}_{subType}"
         if not self.data_types.get(t):
-            self.data_types[t] = self.GENERATORS[type](subType, rest)
+            gen_type = self.GENERATORS[type](subType, rest)
+            self.data_types[t] = gen_type
+            self.data_typed_by_id[gen_type.identifier] = gen_type
 
         return self.data_types[t]
+
+    def createIntegerType(self, subType: str, rest):
+        type = f"INTEGER_{subType}"
+        return ReqIFDataTypeDefinitionInteger(
+            identifier  = ReqIFConveterHelper._gen_id("DTD", type),
+            long_name   = type,
+            last_change = ReqIFConveterHelper._get_timestamp(),
+            min_value   = rest.min or "0",
+            max_value   = rest.max or "65535"
+        )
 
     def createStringType(self, subType: str, rest):
         type = f"STRING_{subType}"
         return ReqIFDataTypeDefinitionString(
-            identifier=ReqIFConveterHelper._gen_id("DTD", type),
-            # long_name=subType,
-            last_change=ReqIFConveterHelper._get_timestamp(),
-            max_length=rest.maxLength or "255",
+            identifier  = ReqIFConveterHelper._gen_id("DTD", type),
+            long_name   = type,
+            last_change = ReqIFConveterHelper._get_timestamp(),
+            max_length  = rest.maxLength or "255",
         )
     
     def createXhtmlType (self, subType: str, rest):
-        type = f"XHTML_{subType}"
+        type = f"XHTML_{subType}" if subType else "XHTML"
         return ReqIFDataTypeDefinitionXHTML(
-            identifier=ReqIFConveterHelper._gen_id("DTD", type),
-            # long_name=subType,
-            last_change=ReqIFConveterHelper._get_timestamp(),
+            identifier  = ReqIFConveterHelper._gen_id("DTD", type),
+            long_name   = type,
+            last_change = ReqIFConveterHelper._get_timestamp(),
         )
 
     def createEnumType (self, subType: str, rest):
@@ -163,26 +117,25 @@ class SpecDataTypesHelper:
         vals = []
         for val in rest.values:
             vals.append(ReqIFEnumValue(
-                identifier=ReqIFConveterHelper._gen_id("EV", val.value),
-                last_change=ReqIFConveterHelper._get_timestamp(),       
-                key=str(val.key),
-                long_name=val.value,
-                other_content=val.content,
+                identifier    = ReqIFConveterHelper._gen_id("EV", val.value),
+                last_change   = ReqIFConveterHelper._get_timestamp(),       
+                key           = str(val.key),
+                long_name     = val.value,
+                other_content = val.content,
             ))
 
         return ReqIFDataTypeDefinitionEnumeration(
-            identifier=ReqIFConveterHelper._gen_id("DTD", type),
-            long_name=subType,
-            last_change=ReqIFConveterHelper._get_timestamp(),
-            values=vals
+            identifier  = ReqIFConveterHelper._gen_id("DTD", type),
+            long_name   = type,
+            last_change = ReqIFConveterHelper._get_timestamp(),
+            values      = vals
         )
 
-
 class SpecTypesHelper:
-    def __init__(self, spec: mapping.Specification | mapping_capella.Specification):
-        self.data_types_helper = SpecDataTypesHelper()
+    '''Helper for the specification types operations'''
+    def __init__(self, spec: mapping.Specification | mapping_capella.Specification, helper: SpecDataTypesHelper):
+        self.data_types_helper = helper
 
-        self.spec_attr_types: Dict[str, ReqIFSpecificationType] = {}
         self.spec_types: Dict[str, ReqIFSpecificationType] = {}
         self.spec_attrs: Dict[str, Dict[str, SpecAttributeDefinition]] = {}
 
@@ -196,37 +149,89 @@ class SpecTypesHelper:
             'XHTML': SpecObjectAttributeType.XHTML
         }
 
+        ### Pre-parse specification
         typeName = spec.type
-
-
         self.spec_attrs[typeName] = {}
-
-        print(spec.attributes)
-
         for key, val in spec.attributes:
             if not val: continue
 
-            print(key, "====", val)
             attr = SpecAttributeDefinition(
-                identifier=ReqIFConveterHelper._gen_id("SAD", key),
-                attribute_type=self._TYPES[val.attributeType],
-                datatype_definition=self.data_types_helper.createType(val.attributeType, "", val).identifier,
-                long_name=val.longName,
-                last_change=ReqIFConveterHelper._get_timestamp()
+                identifier          = ReqIFConveterHelper._gen_id("SAD", key),
+                last_change         = ReqIFConveterHelper._get_timestamp(),
+                attribute_type      = self._TYPES[val.attributeType],
+                datatype_definition = self.data_types_helper.createType(val.attributeType, val.type, val).identifier,
+                long_name           = val.longName,
             )
 
             self.spec_attrs[typeName][key] = attr
 
         specification = ReqIFSpecificationType(
             identifier      = ReqIFConveterHelper._gen_id('ST', typeName),
-            long_name       = typeName,
             last_change     = ReqIFConveterHelper._get_timestamp(),
-            spec_attributes = [*self.spec_attrs[typeName].values()]
+            long_name       = typeName,
+            spec_attributes = [*self.spec_attrs[typeName].values()],
         )
 
         self.spec_types[typeName] = specification
 
     def getSpecType (self, specType) -> ReqIFSpecificationType:
+        """Retrieves or creates specification type based on its name"""
+
+        return self.spec_types[specType]
+    
+    def getSpecAttrType (self, specType, attrName) -> SpecAttributeDefinition:
+        """Retrieves or creates specification attrbiute type based on its name"""
+
+        return self.spec_attrs[specType][attrName]
+
+class SpecObjectTypesHelper:
+    '''Helper for the specification object types operations'''
+    def __init__(self, object: mapping.Requirements | mapping_capella.Requirements, helper: SpecDataTypesHelper):
+        self.data_types_helper = helper
+
+        self.spec_types: Dict[str, ReqIFSpecObjectType] = {}
+        self.spec_attrs: Dict[str, Dict[str, SpecAttributeDefinition]] = {}
+
+        self._TYPES: Dict[str, SpecObjectAttributeType] = {
+            'STRING': SpecObjectAttributeType.STRING,
+            'ENUMERATION': SpecObjectAttributeType.ENUMERATION,
+            'INTEGER': SpecObjectAttributeType.INTEGER,
+            'REAL': SpecObjectAttributeType.REAL,
+            'BOOLEAN': SpecObjectAttributeType.BOOLEAN,
+            'DATE': SpecObjectAttributeType.DATE,
+            'XHTML': SpecObjectAttributeType.XHTML
+        }
+
+        ### Pre-parse specification object types
+        for req in object.variants:
+            typeName = req.type
+            self.spec_attrs[typeName] = {}
+            for key, val in req.attributes:
+                if not val: continue
+
+                name = f"{typeName}_{key}"
+                attr = SpecAttributeDefinition(
+                    identifier          = ReqIFConveterHelper._gen_id("AD", name),
+                    attribute_type      = self._TYPES[val.attributeType],
+                    datatype_definition = self.data_types_helper.createType(val.attributeType, val.type, val).identifier,
+                    long_name           = val.longName,
+                    ### Explicitly false, unless someone needs to implement multi choice
+                    multi_valued        = False if val.attributeType == "ENUMERATION" else None,
+                    last_change         = ReqIFConveterHelper._get_timestamp()
+                )
+
+                self.spec_attrs[typeName][key] = attr
+
+            specification = ReqIFSpecObjectType(
+                identifier            = ReqIFConveterHelper._gen_id('SOT', typeName),
+                long_name             = typeName,
+                last_change           = ReqIFConveterHelper._get_timestamp(),
+                attribute_definitions = [*self.spec_attrs[typeName].values()],
+            )
+
+            self.spec_types[typeName] = specification
+
+    def getSpecType (self, specType) -> ReqIFSpecObjectType:
         """Retrieves or creates specification type based on its name"""
 
         return self.spec_types[specType]
@@ -248,7 +253,9 @@ class ReqIFConverterLib:
         self.data = json
         self.config = config
 
-        self.types_helper: SpecTypesHelper = SpecTypesHelper(self.config.specification)
+        self.data_types_helper: SpecDataTypesHelper = SpecDataTypesHelper()
+        self.types_helper: SpecTypesHelper = SpecTypesHelper(self.config.specification, self.data_types_helper)
+        self.object_types_helper: SpecObjectTypesHelper = SpecObjectTypesHelper(self.config.requirements, self.data_types_helper)
 
         self.timestamp = ReqIFConveterHelper._get_timestamp()
         self.leaf_objects = []
@@ -261,6 +268,12 @@ class ReqIFConverterLib:
 
     def buildAttribute(self, attr: SpecAttributeDefinition, val: str):
         type = attr.attribute_type
+
+        new_val: str | List[str] = ""
+
+        if not val:
+            return None
+
         if type == SpecObjectAttributeType.XHTML:
             # Random rich text issues breaking xml validator
             val = re.sub(r'(</?)s(?:trike)?(\s+|>)',                                   "\\1del\\2",                     val)
@@ -286,11 +299,21 @@ class ReqIFConverterLib:
             # img is not supported by xhtml schema, replace with object and hope for the best
             val = re.sub(r'(<(?:img\s+)[^>]+?src([^\s>]+)[^>]*>)',                         img2obj,     val)
 
-            val = lxml_convert_to_reqif_ns_xhtml_string(f"<div>{val}</div>", False)
-
+            new_val = lxml_convert_to_reqif_ns_xhtml_string(f"<div>{val}</div>", False)
+        elif type == SpecObjectAttributeType.ENUMERATION:
+            enum_type = self.data_types_helper.data_typed_by_id[attr.datatype_definition]
+            if isinstance(enum_type, ReqIFDataTypeDefinitionEnumeration):
+                vals = enum_type.values
+                if vals:
+                    filtered = list(filter(lambda v: v.long_name == val, vals)).pop()
+                    if filtered:
+                        new_val = [filtered.identifier]
+        else:
+            new_val = val
+ 
         return SpecObjectAttribute(
                                 attribute_type=type,
-                                value=val,
+                                value=new_val,
                                 definition_ref=attr.identifier,
                             )
 
@@ -298,34 +321,31 @@ class ReqIFConverterLib:
         """Extract leaf nodes and attributes"""
         print(f"\n[Phase {self.phase()}] Extracting objects...")
 
-        def traverse(node: Dict, path: str = "", level = 1) -> ReqIFSpecHierarchy: 
+        def traverse(node: Dict, req_variant: mapping.Variant|mapping_capella.Variant, level = 1) -> ReqIFSpecHierarchy: 
             is_leaf = len(node.get("children", [])) == 0
 
             obj_data = ReqIFSpecObject(
-                identifier       =ReqIFConveterHelper._gen_id("OBJ"),
-                attributes       =[],
-                description      =lxml_escape_for_html(node.get("Caption", "..Empty..")),
-                spec_object_type =SPEC_OBJECT_TYPES['Functional'].identifier,
-                last_change      =ReqIFConveterHelper._get_timestamp(),
+                identifier       = ReqIFConveterHelper._gen_id("OBJ"),
+                attributes       = [],
+                description      = lxml_escape_for_html(node.get("Caption", "..Empty..")),
+                spec_object_type = self.object_types_helper.getSpecType(req_variant.type).identifier, 
+                last_change      = ReqIFConveterHelper._get_timestamp(),
             )
 
             has_table : Boolean = False
 
             # Extract all attributes
-            for attr_key in ATTRIBUTES.keys():
-                attr = ATTRIBUTES[attr_key]
-                val = node.get(attr_key, "")
+            for attr_key, attr_val in req_variant.attributes:
+                if not attr_val: continue
+
+                attr = self.object_types_helper.getSpecAttrType(req_variant.type, attr_key)
+                if attr_val.selector:
+                    val = self.buildAttribute(attr, " ".join(map(lambda v: v.value, parse(attr_val.selector).find(node))))
+                else:
+                    val = self.buildAttribute(attr, attr_val.literal)
 
                 if val:
-                    obj_data.attributes.append(self.buildAttribute(attr, node.get(attr_key, ""))) 
-
-            obj_data.attributes.append(
-                SpecObjectAttribute(
-                    attribute_type=ATTRIBUTES["IE Object Type"].attribute_type,
-                    definition_ref=ATTRIBUTES["IE Object Type"].identifier,
-                    value=[EOTV[0].identifier],
-                )
-            )
+                    obj_data.attributes.append(val) 
 
             if is_leaf:
                 self.leaf_objects.append(obj_data)
@@ -346,16 +366,20 @@ class ReqIFConverterLib:
                 hier_data.is_table_internal = True
 
             # Recurse
-            for child in node.get("children", []):
-                child = traverse(child, path + " > " + node.get("Caption", ""), level + 1)
-                hier_data.add_child(child)
+            for child in parse(self.config.requirements.selector.root).find(node):
+                for req_variant in self.config.requirements.variants: 
+                    for match in parse(req_variant.match.root).find(child.value):
+                        hier = traverse(match.value, req_variant, level + 1)
+                        hier_data.add_child(hier)
 
             return hier_data
 
         # Start traversal
-        for child in self.data.get("children", []):
-            hier = traverse(child)
-            self.hierarchy_data.append(hier)
+        for root in parse(self.config.requirements.selector.root).find(self.data):
+            for req_variant in self.config.requirements.variants:
+                for match in parse(req_variant.match.root).find(root.value):
+                    hier = traverse(match.value, req_variant)
+                    self.hierarchy_data.append(hier)
 
 
         print(f"      ✓ Total nodes:       {len(self.all_objects)}")
@@ -386,16 +410,17 @@ class ReqIFConverterLib:
             if not attr: continue
 
             attrType = self.types_helper.getSpecAttrType(spec.type, key)
-            attr_objects.append(
-                self.buildAttribute(attrType, " ".join(map(lambda v: v.value, parse(attr.selector).find(data.value))))
-            )
+            val = self.buildAttribute(attrType, " ".join(map(lambda v: v.value, parse(attr.selector).find(data.value))))
+
+            if val:
+                attr_objects.append(val)
 
         specification = ReqIFSpecification(
             identifier         = ReqIFConveterHelper._gen_id("SPEC", parse(spec.id.root).find(data.value).pop().value),
             long_name          = parse(spec.attributes.ReqIF_Name.selector).find(data.value).pop().value,
             last_change        = ReqIFConveterHelper._get_timestamp(),
             children           = self.hierarchy_data,
-            values             = attr_objects,
+            values             = [*attr_objects],
             specification_type = self.types_helper.getSpecType(spec.type).identifier
         )
 
@@ -426,15 +451,14 @@ class ReqIFConverterLib:
 
         specifications = self.buildSpecifications()
 
-        spec_objects   = self.all_objects
-
+        spec_objects = self.all_objects
 
         core_content = ReqIFCoreContent(
             req_if_content = ReqIFReqIFContent(
-                data_types     = [*DATA_TYPES.values(), *self.types_helper.data_types_helper.data_types.values()],
+                data_types     = [*self.data_types_helper.data_types.values()],
                 spec_objects   = spec_objects,
                 specifications = specifications,
-                spec_types     = [*self.types_helper.spec_types.values()],
+                spec_types     = [*self.types_helper.spec_types.values(), *self.object_types_helper.spec_types.values()],
             )
         )
 
@@ -478,16 +502,10 @@ def loadConfigOrExit (path, role) -> mapping.ReqifChoiceSchema|mapping_capella.R
     config = loadOrExit(path, role, True)
     if (config == None):
         sys.exit(1)
-    if (re.match(r'mapping_capella', config)):
-        return mapping_capella.ReqifChoiceSchema.model_validate_json(config)
-        # return mapping_capella.ReqifChoiceSchema(config['config'], config['specification'], config['requirements'], config.get('relations') or None)
-        # return cast(mapping_capella.ReqifChoiceSchema, config)
-    else:
-        return mapping.ReqifChoiceSchema.model_validate_json(config)
-        # return mapping.ReqifChoiceSchema(config['config'], config['specification'], config['requirements'], config.get('relations') or None)
-        # return cast(mapping.ReqifChoiceSchema, config)
     
-
+    PossibleConfigs = Union[mapping_capella.ReqifChoiceSchema, mapping.ReqifChoiceSchema]
+    adapter = pydantic.TypeAdapter(PossibleConfigs)
+    return adapter.validate_json(config)
 
 def main():
     """Main entry point"""
@@ -529,16 +547,11 @@ def main():
 
         reqif_xml_output = ReqIFUnparser.unparse(b)
 
-        # print(reqif_xml_output)
-        # from lxml import etree
-
-        # tree = etree.fromstring('<?xml version="1.0" encoding="UTF-8"?>' + reqif_xml_output);
-
         with open(output_path, "w", encoding="UTF-8") as output_file:
             output_file.write(reqif_xml_output)
 
         print("\n" + "="*70)
-        print("✓ CONVERSION COMPLETE - Ready for ReqIFUnparser")
+        print("✓ CONVERSION COMPLETE")
         print("="*70)
 
         return 0

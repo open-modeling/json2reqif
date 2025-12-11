@@ -69,7 +69,6 @@
     "requirements": {
       "type": "object",
       "required": [
-        "children",
         "selector",
         "variants"
       ],
@@ -77,16 +76,6 @@
       "properties": {
         "selector": {
           "$ref": "./defs/types/defaults.json#/definitions/selector"
-        },
-        "children": {
-          "allOf": [
-            {
-              "description": "Requirements hierarchy JSONPath selector based on the current node, empty selector match creates leaf requirement"
-            },
-            {
-              "$ref": "./defs/types/defaults.json#/definitions/selector"
-            }
-          ]
         },
         "variants": {
           "type": "array",
@@ -96,13 +85,11 @@
             "type": "object",
             "required": [
               "attributes",
-              "match"
+              "match",
+              "type"
             ],
             "additionalProperties": false,
             "properties": {
-              "match": {
-                "$ref": "./defs/types/defaults.json#/definitions/selector"
-              },
               "attributes": {
                 "allOf": [
                   {
@@ -112,6 +99,24 @@
                     "$ref": "defs/requirement_doors.json#/definitions/requirement"
                   }
                 ]
+              },
+              "children": {
+                "allOf": [
+                  {
+                    "description": "Requirements hierarchy JSONPath selector based on the current node, empty selector match creates leaf requirement"
+                  },
+                  {
+                    "$ref": "./defs/types/defaults.json#/definitions/selector"
+                  }
+                ]
+              },
+              "match": {
+                "$ref": "./defs/types/defaults.json#/definitions/selector"
+              },
+              "type": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
               }
             }
           }

@@ -42,6 +42,11 @@
           "readOnly": true,
           "description": "JSONPath pointer to the element from the parent node"
         },
+        "literal": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Literal value for missing selector"
+        },
         "longName": {
           "type": "string",
           "readOnly": true,
@@ -51,6 +56,11 @@
           "type": "string",
           "readOnly": true,
           "description": "Attribute type in the specifications"
+        },
+        "type": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Datatype Name to be used in specification as {attributeType_type}"
         }
       }
     }
