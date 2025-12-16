@@ -13,7 +13,7 @@ def main():
     """Main entry point"""
 
     if len(sys.argv) < 2:
-        print("Usage: python json_to_reqif.py <input.json> <output.reqif> [config.yaml]")
+        print("Usage: python json2reqif <input.json> <output.reqif> [config.json]")
         print()
         print("Arguments:")
         print("  input.json    - JSON file to convert")
